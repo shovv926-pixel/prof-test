@@ -1,0 +1,812 @@
+<div id="career-test">
+
+  <div class="test-header">
+    <h1>Профориентационный тест</h1>
+    <p id="progress">Вопрос 1 из 20</p>
+  </div>
+
+  <div id="question-container"></div>
+
+  <button id="next-btn" disabled>Далее</button>
+
+  <div id="result-container" style="display:none;"></div>
+
+</div>
+
+
+<style>
+
+#career-test {
+  max-width: 850px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  color: #111;
+}
+
+#career-test h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+#progress {
+  font-size: 16px;
+  color: #777;
+  margin-bottom: 35px;
+}
+
+.question {
+  margin-bottom: 25px;
+}
+
+.question-title {
+  font-size: 25px;
+  line-height: 1.35;
+  font-weight: 600;
+  margin-bottom: 25px;
+}
+
+.answer {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 18px 20px;
+  margin-bottom: 12px;
+
+  background: #fff;
+  border: 1px solid #d0d0d0;
+  border-radius: 12px;
+
+  font-size: 17px;
+  line-height: 1.4;
+  text-align: left;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.answer:hover {
+  background: #f5f5f5;
+}
+
+.answer.selected {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+#next-btn {
+  margin-top: 10px;
+  padding: 16px 35px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 17px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#next-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+#result-container {
+  padding-top: 20px;
+}
+
+.result-label {
+  font-size: 16px;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.result-title {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.result-description {
+  font-size: 19px;
+  line-height: 1.6;
+  margin-bottom: 35px;
+}
+
+.scores-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #ddd;
+  font-size: 17px;
+}
+
+.restart-btn {
+  margin-top: 30px;
+  padding: 15px 30px;
+
+  border: 1px solid #111;
+  border-radius: 10px;
+
+  background: #fff;
+  color: #111;
+
+  font-size: 16px;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+
+  #career-test h1 {
+    font-size: 28px;
+  }
+
+  .question-title {
+    font-size: 21px;
+  }
+
+  .answer {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .result-title {
+    font-size: 29px;
+  }
+
+}
+
+</style>
+
+
+<script>
+
+/* ==========================================
+   ВОПРОСЫ
+========================================== */
+
+const questions = [
+
+{
+  text: "Как ты обычно воспринимаешь новую информацию?",
+  answers: [
+    ["А", "Связываю с людьми, стараюсь понять мотивы и чувства."],
+    ["Б", "Лучше всего запоминаю, если прочитаю текст или перескажу своими словами."],
+    ["В", "Нужно увидеть картинку, схему или визуальный образ."],
+    ["Г", "Важна точная формулировка, цифры и логическая цепочка."]
+  ]
+},
+
+{
+  text: "Какой школьный предмет кажется тебе самым важным?",
+  answers: [
+    ["А", "Физика, математика или информатика."],
+    ["Б", "Литература, история или иностранные языки."],
+    ["В", "Биология, обществознание или психология."],
+    ["Г", "МХК (Мировая художественная культура) или черчение."]
+  ]
+},
+
+{
+  text: "Что ты выберешь делать в свободный вечер?",
+  answers: [
+    ["А", "Встретиться с друзьями и поговорить по душам."],
+    ["Б", "Собирать конструктор, играть в стратегию или решать головоломку."],
+    ["В", "Читать книгу, писать пост в блог или обсуждать новости."],
+    ["Г", "Смотреть фильм с красивой картинкой, рисовать или заниматься дизайном."]
+  ]
+},
+
+{
+  text: "Как ты обычно решаешь сложную задачу?",
+  answers: [
+    ["А", "Обсуждаю с кем-то, спрашиваю совета у окружающих."],
+    ["Б", "Ищу информацию в книгах или интернете и анализирую мнения."],
+    ["В", "Разбиваю проблему на части, ищу алгоритм или формулу."],
+    ["Г", "Представляю проблему визуально: рисую схему или ментальную карту."]
+  ]
+},
+
+{
+  text: "Что тебя раздражает больше всего?",
+  answers: [
+    ["А", "Нелогичность, глупые ошибки в расчётах и непоследовательность."],
+    ["Б", "Грубость, невнимание к чувствам других и одиночество."],
+    ["В", "Безвкусица, уродливый интерфейс или хаос вокруг."],
+    ["Г", "Безграмотность, неумение выразить мысль или искажение фактов."]
+  ]
+},
+
+{
+  text: "Если бы у тебя была возможность издать книгу, о чем бы она была?",
+  answers: [
+    ["А", "Научно-популярная книга об устройстве мира или IT-мануал."],
+    ["Б", "Книга по саморазвитию, психологии или сборник жизненных историй."],
+    ["В", "Роман, историческое исследование или сборник стихов."],
+    ["Г", "Книга об искусстве, архитектуре или фотоальбом."]
+  ]
+},
+
+{
+  text: "Что для тебя «Красота»?",
+  answers: [
+    ["А", "Это поступок человека, искренность и любовь."],
+    ["Б", "Это точное, меткое слово или глубокая мысль."],
+    ["В", "Это совершенство конструкции и функциональность."],
+    ["Г", "Это гармония цвета, формы и композиции."]
+  ]
+},
+
+{
+  text: "В какой профессии ты видишь себя в идеале?",
+  answers: [
+    ["А", "Врач, учитель, коуч или специалист по персоналу."],
+    ["Б", "Инженер, программист, ученый-физик или экономист."],
+    ["В", "Архитектор, художник, дизайнер или режиссер."],
+    ["Г", "Журналист, писатель, переводчик или юрист."]
+  ]
+},
+
+{
+  text: "Представь, что ты в музее. Куда ты пойдешь в первую очередь?",
+  answers: [
+    ["А", "В зал технических изобретений или научных достижений."],
+    ["Б", "В интерактивную зону, где можно общаться с другими посетителями."],
+    ["В", "В зал исторических артефактов или древних свитков."],
+    ["Г", "В зал живописи или скульптуры."]
+  ]
+},
+
+{
+  text: "Как ты обычно шутишь?",
+  answers: [
+    ["А", "Использую смешные жесты, мимику или карикатуры."],
+    ["Б", "Шучу на тему отношений или жизненных ситуаций, понятных всем."],
+    ["В", "Играю словами, использую сарказм или умные отсылки."],
+    ["Г", "Шутки построены на абсурдной логике или точных наблюдениях."]
+  ]
+},
+
+{
+  text: "Считаешь ли ты себя организованным человеком?",
+  answers: [
+    ["А", "Моя организованность зависит от настроения и командного духа."],
+    ["Б", "Да, у меня всё разложено по полочкам — буквально и метафорически."],
+    ["В", "Организован в мыслях, но в быту могу быть рассеян."],
+    ["Г", "Организован, если вокруг меня красивое и стильное пространство."]
+  ]
+},
+
+{
+  text: "Что ты изучаешь, когда хочешь понять суть явления?",
+  answers: [
+    ["А", "Его механизм и принцип действия."],
+    ["Б", "Его влияние на людей."],
+    ["В", "Его историю и предпосылки."],
+    ["Г", "Его внешний вид и структуру."]
+  ]
+},
+
+{
+  text: "Какой вид спорта тебе ближе?",
+  answers: [
+    ["А", "Художественная гимнастика, синхронное плавание или фигурное катание."],
+    ["Б", "Шахматы (как битва стратегий) или лёгкая атлетика."],
+    ["В", "Командные игры (футбол, волейбол) или единоборства."],
+    ["Г", "Автоспорт, велоспорт или пауэрлифтинг."]
+  ]
+},
+
+{
+  text: "Твой любимый жанр фильмов?",
+  answers: [
+    ["А", "Научная фантастика, триллер с запутанным сюжетом."],
+    ["Б", "Комедия, мелодрама, социальная драма."],
+    ["В", "Драма, исторический или документальный."],
+    ["Г", "Арт-хаус, фэнтези с крутыми спецэффектами."]
+  ]
+},
+
+{
+  text: "Что ты будешь делать, если сломается бытовая техника?",
+  answers: [
+    ["А", "Спрошу у соседа или друга, может, он знает мастера."],
+    ["Б", "Почитаю инструкцию или форум, опишу проблему текстом."],
+    ["В", "Разберу её сам, чтобы понять внутреннее устройство."],
+    ["Г", "Посмотрю видео на YouTube, как это чинят."]
+  ]
+},
+
+{
+  text: "Как ты определяешь, правдива ли информация?",
+  answers: [
+    ["А", "Прислушиваюсь к мнению авторитетного для меня человека."],
+    ["Б", "Сравниваю тексты нескольких источников, ищу первоисточник."],
+    ["В", "Проверяю факты, цифры и даты."],
+    ["Г", "Оцениваю визуальное оформление."]
+  ]
+},
+
+{
+  text: "Опиши своё идеальное рабочее место.",
+  answers: [
+    ["А", "Тихое место, много книг, удобный стул и блокнот."],
+    ["Б", "Два монитора, удобная клавиатура, доска для схем."],
+    ["В", "Открытое пространство, где можно общаться с коллегами."],
+    ["Г", "Светлое пространство, чистый стол, стильные детали."]
+  ]
+},
+
+{
+  text: "Что такое для тебя успех?",
+  answers: [
+    ["А", "Создание визуально или эмоционально прекрасного объекта."],
+    ["Б", "Счастливая семья, уважение друзей и тепло в коллективе."],
+    ["В", "Признание, известность, статус."],
+    ["Г", "Создание рабочего механизма, программы или решение сложной задачи."]
+  ]
+},
+
+{
+  text: "Ты попал в сложную жизненную ситуацию. Кто твой главный помощник?",
+  answers: [
+    ["А", "Инструкция или план действий «по шагам»."],
+    ["Б", "Поддержка близких людей, их плечо."],
+    ["В", "Внутренний голос и логические доводы."],
+    ["Г", "Фантазия и визуализация желаемого."]
+  ]
+},
+
+{
+  text: "Что вдохновляет тебя в жизни?",
+  answers: [
+    ["А", "Новые технологии, открытия, разгаданные загадки."],
+    ["Б", "Люди, их судьбы и общение с ними."],
+    ["В", "Слова великих людей, поэзия, философия."],
+    ["Г", "Природа, городские пейзажи, искусство."]
+  ]
+}
+
+];
+
+
+/* ==========================================
+   РАСШИФРОВКА
+========================================== */
+
+/*
+  Здесь для каждого вопроса указано,
+  к какому типу относится каждая буква.
+
+  1 = Психолог
+  2 = Гуманитарий
+  3 = Художник
+  4 = Физик
+*/
+
+const mapping = [
+
+  ["psychologist", "humanities", "artist", "physicist"],
+
+  ["physicist", "humanities", "psychologist", "artist"],
+
+  ["psychologist", "physicist", "humanities", "artist"],
+
+  ["psychologist", "humanities", "physicist", "artist"],
+
+  ["physicist", "psychologist", "artist", "humanities"],
+
+  ["physicist", "psychologist", "humanities", "artist"],
+
+  ["psychologist", "humanities", "physicist", "artist"],
+
+  ["psychologist", "physicist", "artist", "humanities"],
+
+  ["physicist", "psychologist", "humanities", "artist"],
+
+  ["artist", "psychologist", "humanities", "physicist"],
+
+  ["psychologist", "physicist", "humanities", "artist"],
+
+  ["physicist", "psychologist", "humanities", "artist"],
+
+  ["artist", "humanities", "psychologist", "physicist"],
+
+  ["physicist", "psychologist", "humanities", "artist"],
+
+  ["psychologist", "humanities", "physicist", "artist"],
+
+  ["psychologist", "humanities", "physicist", "artist"],
+
+  ["humanities", "physicist", "psychologist", "artist"],
+
+  ["artist", "psychologist", "humanities", "physicist"],
+
+  ["physicist", "psychologist", "humanities", "artist"],
+
+  ["physicist", "psychologist", "humanities", "artist"]
+
+];
+
+
+/* ==========================================
+   НАЗВАНИЯ И ОПИСАНИЯ РЕЗУЛЬТАТОВ
+========================================== */
+
+const profiles = {
+
+  psychologist: {
+    name: "Психолог",
+    icon: "Люди и общение",
+    description:
+      "Ты склонен обращать внимание на людей, их чувства, мотивы и взаимоотношения. Тебе может быть интересно разбираться в поведении человека, помогать другим и работать там, где важны коммуникация и понимание людей.",
+    professions:
+      "Психология, педагогика, HR, социология, социальная работа, управление персоналом."
+  },
+
+  humanities: {
+    name: "Гуманитарий",
+    icon: "Слова и смыслы",
+    description:
+      "Тебе близки слова, информация, история, культура и смыслы. Ты можешь получать удовольствие от чтения, анализа текстов, работы с информацией и выражения собственных мыслей.",
+    professions:
+      "Журналистика, филология, лингвистика, история, право, перевод, медиа и коммуникации."
+  },
+
+  artist: {
+    name: "Художник",
+    icon: "Творчество и визуальный мир",
+    description:
+      "Ты обращаешь внимание на визуальную сторону окружающего мира, сочетание форм, цветов и образов. Тебе может быть интересно создавать что-то новое и выражать идеи через визуальные решения.",
+    professions:
+      "Дизайн, архитектура, графика, UX/UI, искусство, режиссура, фотография и визуальные коммуникации."
+  },
+
+  physicist: {
+    name: "Физик",
+    icon: "Логика и технологии",
+    description:
+      "Тебе близки логика, закономерности, точность и устройство окружающего мира. Ты можешь получать удовольствие от решения сложных задач, поиска причин и создания работающих систем.",
+    professions:
+      "Программирование, инженерия, физика, математика, аналитика, информационные технологии и кибербезопасность."
+  }
+
+};
+
+
+/* ==========================================
+   ПЕРЕМЕННЫЕ
+========================================== */
+
+let currentQuestion = 0;
+let selectedAnswer = null;
+
+let scores = {
+  psychologist: 0,
+  humanities: 0,
+  artist: 0,
+  physicist: 0
+};
+
+
+/* ==========================================
+   ПОКАЗ ВОПРОСА
+========================================== */
+
+function showQuestion() {
+
+  const question = questions[currentQuestion];
+
+  document.getElementById("progress").innerText =
+    "Вопрос " + (currentQuestion + 1) + " из " + questions.length;
+
+  let html = "";
+
+  html += '<div class="question">';
+  html += '<div class="question-title">' + question.text + '</div>';
+
+  question.answers.forEach(function(answer, index) {
+
+    html +=
+      '<button class="answer" onclick="selectAnswer(' +
+      index +
+      ')">' +
+      '<strong>' + answer[0] + ")</strong> " +
+      answer[1] +
+      '</button>';
+
+  });
+
+  html += '</div>';
+
+  document.getElementById("question-container").innerHTML = html;
+
+  document.getElementById("next-btn").disabled = true;
+
+  selectedAnswer = null;
+
+  if (currentQuestion === questions.length - 1) {
+    document.getElementById("next-btn").innerText =
+      "Получить результат";
+  } else {
+    document.getElementById("next-btn").innerText =
+      "Далее";
+  }
+
+}
+
+
+/* ==========================================
+   ВЫБОР ОТВЕТА
+========================================== */
+
+function selectAnswer(index) {
+
+  selectedAnswer = index;
+
+  const buttons =
+    document.querySelectorAll(".answer");
+
+  buttons.forEach(function(button) {
+    button.classList.remove("selected");
+  });
+
+  buttons[index].classList.add("selected");
+
+  document.getElementById("next-btn").disabled = false;
+
+}
+
+
+/* ==========================================
+   КНОПКА "ДАЛЕЕ"
+========================================== */
+
+document.getElementById("next-btn").addEventListener(
+  "click",
+  function() {
+
+    if (selectedAnswer === null) {
+      return;
+    }
+
+    /*
+      Получаем тип выбранного ответа
+      из таблицы mapping.
+    */
+
+    const type =
+      mapping[currentQuestion][selectedAnswer];
+
+    scores[type]++;
+
+    if (currentQuestion < questions.length - 1) {
+
+      currentQuestion++;
+
+      showQuestion();
+
+    } else {
+
+      showResult();
+
+    }
+
+  }
+);
+
+
+/* ==========================================
+   ПОКАЗ РЕЗУЛЬТАТА
+========================================== */
+
+function showResult() {
+
+  document.querySelector(".test-header").style.display =
+    "none";
+
+  document.getElementById("question-container").style.display =
+    "none";
+
+  document.getElementById("next-btn").style.display =
+    "none";
+
+
+  /*
+    Находим максимальное количество баллов.
+  */
+
+  const maxScore = Math.max(
+    scores.psychologist,
+    scores.humanities,
+    scores.artist,
+    scores.physicist
+  );
+
+
+  /*
+    Определяем все профили,
+    которые набрали максимальный балл.
+  */
+
+  let winners = [];
+
+  Object.keys(scores).forEach(function(type) {
+
+    if (scores[type] === maxScore) {
+      winners.push(type);
+    }
+
+  });
+
+
+  let resultHTML = "";
+
+  resultHTML +=
+    '<div class="result-label">Твой результат</div>';
+
+
+  /*
+    Если один победитель
+  */
+
+  if (winners.length === 1) {
+
+    const winner = winners[0];
+
+    resultHTML +=
+      '<div class="result-title">' +
+      profiles[winner].name +
+      '</div>';
+
+    resultHTML +=
+      '<div class="result-description">' +
+      '<strong>' +
+      profiles[winner].icon +
+      '</strong><br><br>' +
+      profiles[winner].description +
+      '<br><br>' +
+      '<strong>Возможные направления:</strong><br>' +
+      profiles[winner].professions +
+      '</div>';
+
+  }
+
+
+  /*
+    Если несколько профилей набрали одинаковое
+    максимальное количество баллов
+  */
+
+  else {
+
+    resultHTML +=
+      '<div class="result-title">' +
+      'Несколько подходящих направлений' +
+      '</div>';
+
+    resultHTML +=
+      '<div class="result-description">' +
+      'Твои ответы показывают интерес сразу к нескольким направлениям:<br><br>';
+
+    winners.forEach(function(type) {
+
+      resultHTML +=
+        '<strong>' +
+        profiles[type].name +
+        '</strong><br>' +
+        profiles[type].description +
+        '<br><br>';
+
+    });
+
+    resultHTML += '</div>';
+
+  }
+
+
+  /*
+    Показываем все баллы.
+  */
+
+  resultHTML +=
+    '<div class="scores-title">Распределение баллов</div>';
+
+
+  resultHTML +=
+    '<div class="score-row">' +
+    '<span>Психолог</span>' +
+    '<strong>' +
+    scores.psychologist +
+    '</strong>' +
+    '</div>';
+
+  resultHTML +=
+    '<div class="score-row">' +
+    '<span>Гуманитарий</span>' +
+    '<strong>' +
+    scores.humanities +
+    '</strong>' +
+    '</div>';
+
+  resultHTML +=
+    '<div class="score-row">' +
+    '<span>Художник</span>' +
+    '<strong>' +
+    scores.artist +
+    '</strong>' +
+    '</div>';
+
+  resultHTML +=
+    '<div class="score-row">' +
+    '<span>Физик</span>' +
+    '<strong>' +
+    scores.physicist +
+    '</strong>' +
+    '</div>';
+
+
+  resultHTML +=
+    '<button class="restart-btn" onclick="restartTest()">' +
+    'Пройти тест ещё раз' +
+    '</button>';
+
+
+  document.getElementById("result-container").innerHTML =
+    resultHTML;
+
+  document.getElementById("result-container").style.display =
+    "block";
+
+}
+
+
+/* ==========================================
+   ПОВТОРНОЕ ПРОХОЖДЕНИЕ
+========================================== */
+
+function restartTest() {
+
+  currentQuestion = 0;
+  selectedAnswer = null;
+
+  scores = {
+    psychologist: 0,
+    humanities: 0,
+    artist: 0,
+    physicist: 0
+  };
+
+  document.querySelector(".test-header").style.display =
+    "block";
+
+  document.getElementById("question-container").style.display =
+    "block";
+
+  document.getElementById("next-btn").style.display =
+    "inline-block";
+
+  document.getElementById("result-container").style.display =
+    "none";
+
+  showQuestion();
+
+}
+
+
+/* ==========================================
+   ЗАПУСК ТЕСТА
+========================================== */
+
+showQuestion();
+
+</script>
